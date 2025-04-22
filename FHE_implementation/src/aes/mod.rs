@@ -181,38 +181,38 @@ pub fn run_aes(state: &AESStateBoolean, server_key:&ServerKey, aes_key : Vec<boo
     let mut state_arith = state_bool.aes_recomposer(&server_key, &client_key_debug);
     println!("After recomposition :");
     print_debug_arith(&state_arith, expected[0]);
+
+    for r in 0..9 {
+        println!("======== ROUND {} ========", r + 1);
     
-    //9 full rounds
-    for r in 0..9{
-        println!("TIMING START_ROUND {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
-        println!("Round {}", r + 1);
+        let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+        println!("[START]        Time:  {:?}", now);
+    
         state_arith = sub_bytes(&state_arith, server_key, client_key_debug);
-        println!("TIMING POST_SUB_BYTES {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+        println!("[SubBytes]     Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
         print_debug_arith(&state_arith, "");
-        
-
+    
         state_bool = state_arith.aes_decomposer(&server_key, &client_key_debug);
-        println!("TIMING POST_BOOLEAN_DECOMPOSITION {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+        println!("[Decompose]    Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
         print_debug_arith(&state_arith, "");
-        
-
+    
         state_bool = shift_rows(&state_bool);
-        println!("TIMING POST_SHIFT_ROWS {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
-
+        println!("[ShiftRows]    Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+    
         state_bool = mix_columns(&state_bool, server_key, client_key_debug);
-        println!("TIMING POST_MIX_COLUMNS {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
-
+        println!("[MixColumns]   Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+    
         state_bool = add_round_key(&state_bool, &round_keys[r + 1], server_key);
-        println!("TIMING POST_ADD_ROUND_KEYS {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
-        
-        print_debug(&state_bool, expected[r+1]);
-
-
+        println!("[AddRoundKey]  Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+        print_debug(&state_bool, expected[r + 1]);
+    
         state_arith = state_bool.aes_recomposer(&server_key, &client_key_debug);
-        println!("TIMING POST_BOOLEAN_RECOMPOSITION {} {:?}", r+1, SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
-        print_debug_arith(&state_arith, expected[r+1]);
-        
+        println!("[Recompose]    Time:  {:?}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap());
+        print_debug_arith(&state_arith, expected[r + 1]);
+    
+        println!("=========================\n");
     }
+    
     state_arith = sub_bytes(&state_arith, server_key, client_key_debug);
     
     
